@@ -8,8 +8,17 @@ from window import Window
 
 class Maze:
     """
+    The `Maze` object stores a matrix of cells that connect to one another to
+    form a maze with at least one valid path from the top left corner to the
+    bottom right corner.
+
     Attributes:
-        num_cols(int): The number of colums in the maze
+        num_cols(int): The number of columns in the maze
+        num_rows(int): The number of rows in the maze
+        cell_width(int): The pixel width of each maze cell
+        cell_height(int): The pixel height of each maze cell
+        win(int): The `Window` object
+        cells(List[List[Cell]]): The matrix of cells that make up the maze
     """
     def __init__(
         self,
