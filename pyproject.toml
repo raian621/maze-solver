@@ -1,0 +1,19 @@
+[tool.coverage.report]
+omit = ["**/tests/*", "**/migrations/*"]
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = "-v"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D", "ANN", "S", "PT009", "COM812"]
+"**/migrations/*" = ["ALL"]
