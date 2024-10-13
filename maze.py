@@ -1,4 +1,7 @@
-from collections import defaultdict
+import heapq
+from math import sqrt
+from typing import Dict
+from collections import defaultdict, deque
 from random import randint
 from time import sleep
 
@@ -17,6 +20,7 @@ class Maze:
         num_rows(int): The number of rows in the maze
         cell_width(int): The pixel width of each maze cell
         cell_height(int): The pixel height of each maze cell
+        delay(int): The minimum time to wait after calling the _animate method
         win(int): The `Window` object
         cells(List[List[Cell]]): The matrix of cells that make up the maze
     """
@@ -26,6 +30,7 @@ class Maze:
         num_rows: int,
         cell_width: int,
         cell_height: int,
+        delay: int,
         win: Window,
     ):
         self.num_cols = num_cols
@@ -33,6 +38,7 @@ class Maze:
         self.cell_width = cell_width
         self.cell_height = cell_height
         self.win = win
+        self.delay = delay
         self._create_cells()
         self._break_entrance_and_exit()
         self._break_walls()
@@ -58,7 +64,8 @@ class Maze:
 
     def _animate(self):
         self.win.redraw()
-        sleep(0.005)
+        if self.delay > 0:
+            sleep(self.delay)
 
     def _break_entrance_and_exit(self):
         self.cells[0][0].has_top = False
@@ -111,11 +118,17 @@ class Maze:
     def solve(self, algorithm: str = "dfs") -> bool:
         if algorithm == "dfs":
             return self._solve_dfs()
+        elif algorithm == "bfs":
+            return self._solve_bfs()
+        elif algorithm == "astar":
+            return self._solve_a_star()
+        
+        return False
 
     def _solve_dfs(self):
         stack = [(0, 0)]
         dirs = [0, 1, 0, -1, 0]
-        parents = defaultdict(tuple)
+        parents = {}
 
         while stack:
             self._animate()
@@ -126,31 +139,12 @@ class Maze:
             if parent:
                 self.win.draw_move(self.cells[i][j], self.cells[parent[0]][parent[1]])
             if i == self.num_rows-1 and j == self.num_cols-1:
-                # draw path:
-                prev = (self.num_rows-1, self.num_cols-1)
-                curr = parents[prev]
-                while True:
-                    self.win.draw_move(
-                        self.cells[prev[0]][prev[1]],
-                        self.cells[curr[0]][curr[1]],
-                        True
-                    )
-                    if curr == (0, 0):
-                        break
-                    tmp = prev
-                    prev = curr
-                    curr = parents[tmp]
+                self._draw_path(parents) 
                 return True
             for k in range(4):
                 ni, nj = i + dirs[k], j + dirs[k+1]
                 # continue if a wall is in the way
-                if k == 0 and self.cells[i][j].has_right:
-                    continue
-                elif k == 1 and self.cells[i][j].has_bottom:
-                    continue
-                elif k == 2 and self.cells[i][j].has_left:
-                    continue
-                elif k == 3 and self.cells[i][j].has_top:
+                if self._blocked(i, j, k):
                     continue
                 if (
                     0 <= ni < self.num_rows
@@ -161,3 +155,101 @@ class Maze:
                     stack.append((ni, nj))
 
         return False
+
+    def _solve_bfs(self):
+        queue = deque([(0, 0)])
+        dirs = [0, 1, 0, -1, 0]
+        parents = defaultdict(tuple)
+
+        while queue:
+            self._animate()
+            i, j = queue.popleft()
+            self.cells[i][j]
+            self.cells[i][j].visited = True
+            self._draw_cell(i, j)
+            parent = parents.get((i, j), None)
+            if parent:
+                self.win.draw_move(self.cells[i][j], self.cells[parent[0]][parent[1]])
+            if i == self.num_rows-1 and j == self.num_cols-1:
+                self._draw_path(parents) 
+                return True
+            for k in range(4):
+                ni, nj = i + dirs[k], j + dirs[k+1]
+                # continue if a wall is in the way
+                if self._blocked(i, j, k):
+                    continue
+                if (
+                    0 <= ni < self.num_rows
+                    and 0 <= nj < self.num_cols
+                    and not self.cells[ni][nj].visited
+                ):
+                    parents[(ni, nj)] = (i, j)
+                    queue.append((ni, nj))
+
+        return False
+    
+    def _euclidian_distance_heuristic(self, i: int, j: int, dist: int) -> float:
+        return dist + sqrt((i - self.num_cols)**2 + (j - self.num_rows)**2)
+
+    def _solve_a_star(self) -> bool:
+        # shorten the function name for the euclidian distance heuristic
+        # NOTE: can probably hot-swap heuristics using a parameter later
+        f = self._euclidian_distance_heuristic
+        heap = [(f(0, 0, 0), 0, 0, 0)]
+        parents = {}
+        dirs = [0, 1, 0, -1, 0]
+
+        while heap:
+            self._animate()
+            _, i, j, dist = heapq.heappop(heap)
+            self.cells[i][j]
+            self.cells[i][j].visited = True
+            self._draw_cell(i, j)
+            parent = parents.get((i, j), None)
+            if parent:
+                self.win.draw_move(self.cells[i][j], self.cells[parent[0]][parent[1]])
+            if i == self.num_rows-1 and j == self.num_cols-1:
+                self._draw_path(parents) 
+                return True
+            for k in range(4):
+                ni, nj = i + dirs[k], j + dirs[k+1]
+                # continue if a wall is in the way
+                if self._blocked(i, j, k):
+                    continue
+                if (
+                    0 <= ni < self.num_rows
+                    and 0 <= nj < self.num_cols
+                    and not self.cells[ni][nj].visited
+                ):
+                    parents[(ni, nj)] = (i, j)
+                    heapq.heappush(heap, (f(ni, nj, dist+1), ni, nj, dist))
+        
+        return False
+
+
+    def _blocked(self, i, j, k) -> bool:
+        if k == 0 and self.cells[i][j].has_right:
+            return True
+        elif k == 1 and self.cells[i][j].has_bottom:
+            return True
+        elif k == 2 and self.cells[i][j].has_left:
+            return True
+        elif k == 3 and self.cells[i][j].has_top:
+            return True
+        return False
+
+    def _draw_path(self, parents: Dict[tuple, tuple]):
+        prev = (self.num_rows-1, self.num_cols-1)
+        curr = parents[prev]
+        while True:
+            self._animate()
+            self.win.draw_move(
+                self.cells[prev[0]][prev[1]],
+                self.cells[curr[0]][curr[1]],
+                True
+            )
+            if curr == (0, 0):
+                break
+            tmp = prev
+            prev = curr
+            curr = parents[tmp]

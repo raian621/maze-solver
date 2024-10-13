@@ -4,9 +4,9 @@ from primitives import Cell, Point, Line
 
 
 class Window:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, title: str = "Maze Solver"):
         self.__root = Tk()
-        self.__root.title("Maze Solver")
+        self.__root.title(title)
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
         self.width = width
         self.height = height
@@ -18,7 +18,6 @@ class Window:
         self.running = False
 
     def redraw(self):
-        self.canvas.create_rectangle(0, 0, self.width, self.height)
         self.__root.update_idletasks()
         self.__root.update()
 
