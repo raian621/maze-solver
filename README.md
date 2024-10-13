@@ -10,7 +10,7 @@ To start the maze solver, navigate to the project directory and run the followin
 python main.py
 ```
 
-By default, the maze solver will use depth-first search to find a path from the top left corner of the maze to the bottom right corner of the maze. You can change the algorithmm used by providing an alternative algorithm:
+By default, the maze solver will use depth-first search to find a path from the top left corner of the maze to the bottom right corner of the maze. You can change the algorithm used by providing an alternative algorithm as a command line argument:
 
 ```sh
 python main.py -a astar
