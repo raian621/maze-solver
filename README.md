@@ -25,5 +25,6 @@ python main.py -a astar
 - `-c | --cell-width`: Specify the pixel width of each cell in the maze
 - `-d | --delay`: Specify the time to wait between steps of the maze solving visualizations
 - `-h | --help`: Display the help screen
+- `-p | --prob`: Specify the probability of a random wall being broken in each cell. Higher probabilities open up more paths from the source to the destination in the maze.
 - `-H | --height`: Specify the height of the GUI window
 - `-W | --width`: Specify the width of the GUI window

@@ -2,7 +2,7 @@ import heapq
 from math import sqrt
 from typing import Dict
 from collections import defaultdict, deque
-from random import randint, shuffle
+from random import choices, shuffle, uniform
 from time import sleep
 
 from primitives import Cell, Point
@@ -26,6 +26,7 @@ class Maze:
         cell_height(int): The pixel height of each maze cell
         delay(int): The minimum time to wait after calling the _animate method
         win(int): The `Window` object
+        prob(float): The probability of a random wall being broken for each cell
         cells(List[List[Cell]]): The matrix of cells that make up the maze
     """
 
@@ -36,6 +37,7 @@ class Maze:
         cell_width: int,
         cell_height: int,
         delay: int,
+        prob: float,
         win: Window,
     ):
         self.num_cols = num_cols
@@ -44,6 +46,7 @@ class Maze:
         self.cell_height = cell_height
         self.win = win
         self.delay = delay
+        self.prob = prob
         self._create_cells()
         self._break_entrance_and_exit()
         self._break_walls()
@@ -118,6 +121,19 @@ class Maze:
                     self._break_direction(i, j, k)
                     break
 
+        # randomly break walls based on self.prob probability
+        for i in range(self.num_cols):
+            for j in range(self.num_rows):
+                if uniform(0, 1) > self.prob:
+                    continue
+                dirs = []
+                for k in range(4):
+                    ni, nj = i + DIRECTIONS[k], j + DIRECTIONS[k + 1]
+                    if 0 <= ni < self.num_cols-1 and 0 <= nj < self.num_rows-1 and not self._blocked(i, j, k):
+                        dirs.append(k)
+                if len(dirs) > 0:
+                    self._break_direction(i, j, choices(dirs))
+
     def draw(self):
         for row in range(self.num_rows):
             for col in range(self.num_cols):
@@ -135,7 +151,6 @@ class Maze:
 
     def _solve_dfs(self):
         stack = [(0, 0)]
-        dirs = [0, 1, 0, -1, 0]
         parents = {}
 
         while stack:
@@ -152,7 +167,7 @@ class Maze:
                 self._draw_path(parents)
                 return True
             for k in range(4):
-                ni, nj = i + dirs[k], j + dirs[k + 1]
+                ni, nj = i + DIRECTIONS[k], j + DIRECTIONS[k + 1]
                 # continue if a wall is in the way
                 if self._blocked(i, j, k):
                     continue
@@ -164,7 +179,6 @@ class Maze:
 
     def _solve_bfs(self):
         queue = deque([(0, 0)])
-        dirs = [0, 1, 0, -1, 0]
         parents = defaultdict(tuple)
 
         while queue:
@@ -182,7 +196,7 @@ class Maze:
                 self._draw_path(parents)
                 return True
             for k in range(4):
-                ni, nj = i + dirs[k], j + dirs[k + 1]
+                ni, nj = i + DIRECTIONS[k], j + DIRECTIONS[k + 1]
                 # continue if a wall is in the way
                 if self._blocked(i, j, k):
                     continue
@@ -203,7 +217,6 @@ class Maze:
         f = self._euclidian_distance_heuristic
         heap = [(f(0, 0, 0), 0, 0, 0)]
         parents = {}
-        dirs = [0, 1, 0, -1, 0]
 
         while heap:
             self._animate()
@@ -219,7 +232,7 @@ class Maze:
                 self._draw_path(parents)
                 return True
             for k in range(4):
-                ni, nj = i + dirs[k], j + dirs[k + 1]
+                ni, nj = i + DIRECTIONS[k], j + DIRECTIONS[k + 1]
                 # continue if a wall is in the way
                 if self._blocked(i, j, k):
                     continue

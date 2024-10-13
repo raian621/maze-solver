@@ -5,13 +5,14 @@ from window import Window
 from getopt import getopt
 from sys import argv, exit
 
-options = "W:H:c:a:d:h"
+options = "W:H:c:a:d:p:h"
 long_options = [
     "width=",
     "height=",
     "cell-width=",
     "algorithm=",
     "delay=",
+    "prob=",
     "help",
 ]
 
@@ -38,6 +39,8 @@ Options:
         Sets the delay between steps in the maze solver algorithm
     -h | --help:
         Display this help text
+    -p | --prob:
+        Sets the probability for each cell to have a random wall broken
     -H | --height:
         Sets the height of the GUI window
     -W | --width:
@@ -57,6 +60,8 @@ def get_opts() -> Dict[str, any]:
             opts["height"] = int(value)
         elif flag == "-c" or flag == "--cell-width":
             opts["cell_width"] = int(value)
+        elif flag == "-p" or flag == "--prob":
+            opts["prob"] = float(value)
         elif flag == "-a" or flag == "--algorithm":
             if value not in SUPPORTED_ALGORITHMS:
                 print(f"Algorithm `{value}` not supported")
@@ -86,6 +91,7 @@ if __name__ == "__main__":
     algorithm = opts.get("algorithm", "dfs")
     delay = opts.get("delay", 0.033)  # a lil less than 30 fps
     title = f"Maze Solver ({ALGORITHM_FULL_NAMES[algorithm]})"
+    prob = opts.get("prob", 0.05)
     window = Window(width, height, title)
     maze = Maze(
         width // cell_width,
@@ -93,6 +99,7 @@ if __name__ == "__main__":
         cell_width,
         cell_height,
         delay,
+        prob,
         window,
     )
     maze._break_down(0, 0)
