@@ -46,4 +46,4 @@ class Window:
                 to_cell.origin.y + to_cell.height // 2,
             ),
         )
-        line.draw(self.canvas, "blue" if undo else "gray")
+        line.draw(self.canvas, "magenta" if undo else "gray")

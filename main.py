@@ -6,12 +6,17 @@ from getopt import getopt
 from sys import argv, exit
 
 options = "W:H:c:a:d:h"
-long_options = ["width=", "height=", "cell-width=", "algorithm=", "delay=", "help"]
+long_options = [
+    "width=",
+    "height=",
+    "cell-width=",
+    "algorithm=",
+    "delay=",
+    "help",
+]
 
 
-SUPPORTED_ALGORITHMS = set([
-    "dfs", "bfs", "astar"
-])
+SUPPORTED_ALGORITHMS = set(["dfs", "bfs", "astar"])
 ALGORITHM_FULL_NAMES = {
     "dfs": "Depth-First Search",
     "bfs": "Breadth-First Search",
@@ -64,7 +69,7 @@ def get_opts() -> Dict[str, any]:
             exit(0)
         else:
             print(f"unknown option provided {flag}")
-    
+
     if should_exit:
         exit(1)
 
@@ -74,9 +79,12 @@ def get_opts() -> Dict[str, any]:
 if __name__ == "__main__":
     opts = get_opts()
     width, height = opts.get("width", 800), opts.get("height", 500)
-    cell_width, cell_height = opts.get("cell_width", 20), opts.get("cell_width", 20)
+    cell_width, cell_height = (
+        opts.get("cell_width", 20),
+        opts.get("cell_width", 20),
+    )
     algorithm = opts.get("algorithm", "dfs")
-    delay = opts.get("delay", 0.033) # a lil less than 30 fps
+    delay = opts.get("delay", 0.033)  # a lil less than 30 fps
     title = f"Maze Solver ({ALGORITHM_FULL_NAMES[algorithm]})"
     window = Window(width, height, title)
     maze = Maze(
@@ -85,8 +93,9 @@ if __name__ == "__main__":
         cell_width,
         cell_height,
         delay,
-        window
+        window,
     )
+    maze._break_down(0, 0)
     window.redraw()
     maze.draw()
     maze.solve(algorithm)
