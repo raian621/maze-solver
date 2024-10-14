@@ -2,7 +2,7 @@
 
 A simple maze solver written in Python
 
-![A screenshot of the maze solver program result after running the A-Star search algorithm](media/screenshot.png)
+![A video of the maze solver program visualizing the A-Star search algorithm](media/maze-solver.gif)
 
 To start the maze solver, navigate to the project directory and run the following line in your terminal:
 

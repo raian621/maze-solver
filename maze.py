@@ -163,7 +163,7 @@ class Maze:
                 self.win.draw_move(
                     self.cells[i][j], self.cells[parent[0]][parent[1]]
                 )
-            if i == self.num_rows - 1 and j == self.num_cols - 1:
+            if i == self.num_cols - 1 and j == self.num_rows - 1:
                 self._draw_path(parents)
                 return True
             for k in range(4):
@@ -192,7 +192,7 @@ class Maze:
                 self.win.draw_move(
                     self.cells[i][j], self.cells[parent[0]][parent[1]]
                 )
-            if i == self.num_rows - 1 and j == self.num_cols - 1:
+            if i == self.num_cols - 1 and j == self.num_rows - 1:
                 self._draw_path(parents)
                 return True
             for k in range(4):
